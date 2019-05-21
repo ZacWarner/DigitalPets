@@ -16,9 +16,13 @@ database = firebase.database();
 
 
 
+
+
+
 function DigitalPal(name) {
     this.name = name;
     this.hungry = false;
+    this.feedTime = "string";
     this.sleepy = false;
     this.bored = true;
     this.age = 0;
@@ -27,6 +31,7 @@ function DigitalPal(name) {
             console.log("That was yummy!");
             petTalk("That was yummy!");
             this.hungry = false;
+            this.feedTime = JSON.stringify(moment());
             this.sleepy = true;
             setDataBase();
         }
@@ -143,6 +148,8 @@ function petTalk(string) {
 };
 
 function gameStart() {
+    pullDataBase();
+    // timeCheck();
     $("#gameControls").empty();
     var dir = $("<p>").html("Which animal do you want to play with?");
     $("#petTalk").empty();
@@ -151,11 +158,14 @@ function gameStart() {
     var dog = $("<button>").addClass("btn btn-primary m-2").attr("id", "dog").html("dog");
     $("#gameControls").append(cat, dog);
 
+
+
 };
 
 function catControl() {
     $("#gameControls").empty();
     $("#petTalk").empty();
+    $("#picture").attr("src", "assets/images/cat.png");
     var feed = $("<button>").addClass("btn btn-primary m-2").attr("id", "feed").html("feed");
     var sleep = $("<button>").addClass("btn btn-primary m-2").attr("id", "sleep").html("sleep");
     var play = $("<button>").addClass("btn btn-primary m-2").attr("id", "play").html("play");
@@ -167,6 +177,7 @@ function catControl() {
 function dogControl() {
     $("#gameControls").empty();
     $("#petTalk").empty();
+    $("#picture").attr("src", "assets/images/dog.png");
     var feed = $("<button>").addClass("btn btn-primary m-2").attr("id", "feed").html("feed");
     var sleep = $("<button>").addClass("btn btn-primary m-2").attr("id", "sleep").html("sleep");
     var play = $("<button>").addClass("btn btn-primary m-2").attr("id", "play").html("play");
@@ -193,6 +204,7 @@ function setDataBase() {
         sleepy: cat.sleepy,
         bored: cat.bored,
         age: cat.age,
+        feedTime: cat.feedTime,
         houseCondition: cat.houseCondition,
     });
 
@@ -202,6 +214,7 @@ function setDataBase() {
         sleepy: dog.sleepy,
         bored: dog.bored,
         age: dog.age,
+        feedTime: dog.feedTime,
         outside: dog.outside,
     });
 
@@ -211,12 +224,8 @@ function setDataBase() {
 // cat status updater
 database.ref("/cat").on("value", function (snapshot) {
 
-    // Log everything that's coming out of snapshot
-    console.log(snapshot.val());
-    console.log(snapshot.val().name);
-    console.log(snapshot.val().email);
-    console.log(snapshot.val().age);
-    console.log(snapshot.val().comment);
+
+
 
     // Change the HTML to reflect
     $("#catName").text("Name: " + snapshot.val().name);
@@ -254,27 +263,33 @@ database.ref("/dog").on("value", function (snapshot) {
 //button click events
 $(document).on("click", "#feed", function () {
     if (playerPick == "cat") {
+        $("#picture").attr("src", "assets/images/catFed.png");
         cat.feed();
     }
     else if (playerPick == "dog") {
+        $("#picture").attr("src", "assets/images/dogFed.png");
         dog.feed();
     }
 });
 
 $(document).on("click", "#sleep", function () {
     if (playerPick == "cat") {
+        $("#picture").attr("src", "assets/images/catSleep.png");
         cat.sleep();
     }
     else if (playerPick == "dog") {
+        $("#picture").attr("src", "assets/images/dogSleep.png");
         dog.sleep();
     }
 });
 
 $(document).on("click", "#play", function () {
     if (playerPick == "cat") {
+        $("#picture").attr("src", "assets/images/catPlay.png");
         cat.play();
     }
     else if (playerPick == "dog") {
+        $("#picture").attr("src", "assets/images/dogPlay.png");
         dog.play();
     }
 });
@@ -307,5 +322,132 @@ $(document).on("click", "#goInside", function () {
 
 });
 
+
+function pullDataBase() {
+    database.ref("/cat").once("value").then(function (snapshot) {
+
+        // sets object to database values
+        cat.name = snapshot.val().name;
+        cat.hungry = snapshot.val().hungry;
+        cat.sleepy = snapshot.val().sleepy;
+        cat.bored = snapshot.val().bored;
+        cat.age = snapshot.val().age;
+        cat.feedTime = snapshot.val().feedTime;
+        cat.houseCondition = snapshot.val().houseCondition;
+
+
+        checkAliveCat();
+        // Handle the errors
+    }, function (errorObject) {
+        console.log("Errors handled: " + errorObject.code);
+    });
+
+
+
+    database.ref("/dog").once("value").then(function (snapshot) {
+
+        // sets object to database values
+        dog.name = snapshot.val().name;
+        dog.hungry = snapshot.val().hungry;
+        dog.sleepy = snapshot.val().sleepy;
+        dog.bored = snapshot.val().bored;
+        dog.age = snapshot.val().age;
+        dog.feedTime = snapshot.val().feedTime;
+        dog.outside = snapshot.val().outside;
+
+        checkAliveDog();
+
+        // Handle the errors
+    }, function (errorObject) {
+        console.log("Errors handled: " + errorObject.code);
+    });
+};
+
+//function to check if pet is alive
+function checkAliveCat() {
+
+    var lastFedCat = cat.feedTime;
+    console.log(lastFedCat);
+    var len = lastFedCat.length - 2;
+    lastFedCat = lastFedCat.substr(1, len);
+    lastFedCat = moment(lastFedCat);
+    console.log(lastFedCat);
+    var daysSinceFed = lastFedCat.diff(moment(), "days");
+    console.log(daysSinceFed);
+
+    if (daysSinceFed <= -1) {
+        let days = daysSinceFed * -1;
+        petTalk("you havn't fed the cat in " + days + " and it died.");
+        $("#gameControls").empty();
+    }
+
+
+};
+
+
+function checkAliveDog() {
+
+    var lastFedDog = dog.feedTime;
+    console.log(lastFedDog);
+    var len = lastFedDog.length - 2;
+    lastFedDog = lastFedDog.substr(1, len);
+    lastFedDog = moment(lastFedDog);
+    console.log(lastFedDog);
+    var daysSinceFed = lastFedDog.diff(moment(), "days");
+    console.log(daysSinceFed);
+
+    if (daysSinceFed <= -1) {
+        let days = daysSinceFed * -1;
+        petTalk("you havn't fed the dog in " + days + " and it died.");
+        $("#gameControls").empty();
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+// currentTime = moment();
+
+// newTime = JSON.stringify(moment());
+// console.log(newTime);
+
+// database.ref("/time").set({
+//     currentTime: newTime,
+// });
+
+// var firebaseTime;
+
+// database.ref("/time").on("value", function (snap) {
+//     firebaseTime = snap.val().currentTime;
+// })
+
+// console.log(firebaseTime);
+// var len = firebaseTime.length - 2;
+// // console.log(newTime);
+// console.log(len);
+// newTime = firebaseTime.substr(1, len);
+// console.log(newTime);
+// console.log(moment(newTime));
+// console.log(moment(newTime).format("YYYY-MM-DD hh:mm"));
+// database.ref("/time").set({
+//     currentTime: serverValue.TIMESTAMP,
+// });
+
 gameStart();
 
+
+// var lastFedCat = cat.feedTime;
+// console.log(lastFedCat);
+// var len = lastFedCat.length - 2;
+// lastFedCat = lastFedCat.substr(1, len);
+// lastFedCat = moment(lastFedCat);
+// console.log(lastFedCat);
+// var daysSinceFed = lastFedCat.diff(moment(), "days");
+// console.log(daysSinceFed);
