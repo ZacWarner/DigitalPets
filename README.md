@@ -1,3 +1,21 @@
 # DigitalPets
 
-#### I basically took the tamagatchi activity and added firebase and moment. It stores the last time they were fed, if there not fed in a day....... well we can always make another one.
+**I basically took the tamagatchi activity and added firebase and
+moment. It stores the last time they were fed, if there not fed in a
+day....... well we can always make another one.**
+
+See the pets come to life on [GitHub
+Pages](https://zacwarner.github.io/DigitalPets/)!
+
+## Original artwork 
+
+![cat](/assets/imags/cat.png)
+![dog](/assets/imags/cat.png)
+
+## Technology Stack
+
+- Bootstrap
+- Google Firebase
+- Vanilla HTML/CSS/JavaScript
+
+Special thanks to `console.log` for technical support.
