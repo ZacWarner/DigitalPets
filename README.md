@@ -10,7 +10,7 @@ Pages](https://zacwarner.github.io/DigitalPets/)!
 ## Original artwork 
 
 ![cat](/assets/images/cat.png)
-![dog](/assets/images/cat.png)
+![dog](/assets/images/dog.png)
 
 ## Technology Stack
 
