@@ -375,10 +375,13 @@ function checkAliveCat() {
     var daysSinceFed = lastFedCat.diff(moment(), "days");
     console.log(daysSinceFed);
 
+
     if (daysSinceFed <= -1) {
         let days = daysSinceFed * -1;
         petTalk("you havn't fed the cat in " + days + " and it died.");
         $("#gameControls").empty();
+        var dog = $("<button>").addClass("btn btn-primary m-2").attr("id", "dog").html("dog");
+        $("#gameControls").append(dog);
     }
 
 
